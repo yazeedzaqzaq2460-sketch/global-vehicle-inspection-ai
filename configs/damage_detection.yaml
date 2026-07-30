@@ -1,0 +1,24 @@
+model:
+  name: yolo11n-seg
+  weights: models/yolo/best.pt
+  task: segment
+
+inference:
+  image_size: 640
+  confidence_threshold: 0.25
+  iou_threshold: 0.45
+  device: cuda
+
+classes:
+  - broken_glass
+  - dent
+  - scratch
+  - crack
+  - lamp_broken
+  - tire_flat
+  - wreck
+
+output:
+  save_images: true
+  save_labels: true
+  directory: outputs/damage_detection
