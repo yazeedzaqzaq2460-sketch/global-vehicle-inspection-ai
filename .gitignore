@@ -216,3 +216,28 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# ==========================
+# AI Project
+# ==========================
+
+# Trained models
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+
+# YOLO outputs
+runs/
+outputs/
+
+# Test images
+test_images/
+
+# Datasets
+datasets/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
