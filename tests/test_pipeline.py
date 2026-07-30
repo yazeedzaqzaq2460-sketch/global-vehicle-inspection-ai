@@ -11,9 +11,11 @@ def test_pipeline_returns_expected_structure():
     assert "damage_count" in result
     assert "highest_confidence" in result
     assert "damages" in result
+    assert "vehicle_data" in result
 
     assert result["image_path"] == "test_images/car_damage.jpg"
     assert result["decision"] in {"pass", "manual_review", "fail"}
     assert isinstance(result["damage_count"], int)
     assert isinstance(result["highest_confidence"], float)
     assert isinstance(result["damages"], list)
+    assert isinstance(result["vehicle_data"], dict)
