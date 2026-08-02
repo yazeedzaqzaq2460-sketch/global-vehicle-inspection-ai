@@ -4,6 +4,7 @@ from typing import Any
 from src.core.decision_engine import DecisionEngine
 from src.detection.damage_detector import DamageDetector
 from src.ocr.ocr_engine import OCREngine
+from src.quality.image_quality_engine import ImageQualityEngine
 from src.reasoning.association_engine import AssociationEngine
 from src.reasoning.severity_engine import SeverityEngine
 from src.vehicle_parts.vehicle_part_detector import VehiclePartDetector
@@ -11,6 +12,13 @@ from src.vehicle_parts.vehicle_part_detector import VehiclePartDetector
 
 class InspectionPipeline:
     def __init__(self) -> None:
+        self.image_quality_engine = ImageQualityEngine(
+            blur_threshold=100.0,
+            minimum_brightness=45.0,
+            maximum_brightness=220.0,
+            minimum_contrast=30.0,
+        )
+
         self.damage_detector = DamageDetector(
             model_path="models/yolo/best.pt",
             confidence_threshold=0.25,
@@ -46,6 +54,27 @@ class InspectionPipeline:
             raise FileNotFoundError(
                 f"Input image not found: {image_path_object}"
             )
+
+        quality_result = self.image_quality_engine.evaluate(
+            str(image_path_object)
+        )
+
+        if not quality_result["is_acceptable"]:
+            return {
+                "image_path": image_path,
+                "decision": "RECAPTURE_REQUIRED",
+                "damage_count": 0,
+                "highest_confidence": 0.0,
+                "highest_severity_score": 0.0,
+                "damages": [],
+                "vehicle_parts": [],
+                "vehicle_data": {
+                    "license_plate": None,
+                    "vin": None,
+                    "engine_number": None,
+                },
+                "image_quality": quality_result,
+            }
 
         damages = self.damage_detector.predict(
             str(image_path_object)
@@ -104,4 +133,5 @@ class InspectionPipeline:
             "damages": evaluated_damages,
             "vehicle_parts": vehicle_parts,
             "vehicle_data": vehicle_data,
+            "image_quality": quality_result,
         }
