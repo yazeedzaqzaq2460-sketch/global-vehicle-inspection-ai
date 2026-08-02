@@ -4,19 +4,19 @@ from typing import Any
 from ultralytics import YOLO
 
 
-class DamageDetector:
+class VehiclePartDetector:
     def __init__(
         self,
-        model_path: str,
-        confidence_threshold: float = 0.25,
-        iou_threshold: float = 0.45,
+        model_path: str = "models/vehicle_parts/best.pt",
+        confidence_threshold: float = 0.33,
+        iou_threshold: float = 0.50,
         device: int | str = 0,
     ) -> None:
         self.model_path = Path(model_path)
 
         if not self.model_path.exists():
             raise FileNotFoundError(
-                f"Damage detection model not found: {self.model_path}"
+                f"Vehicle-parts model not found: {self.model_path}"
             )
 
         if not 0.0 <= confidence_threshold <= 1.0:
@@ -35,9 +35,9 @@ class DamageDetector:
 
         self.model = YOLO(str(self.model_path))
 
-        print("YOLO damage detector initialized.")
+        print("Vehicle Part Detector initialized.")
 
-    def predict(self, image_path: str) -> list[dict[str, Any]]:
+    def detect(self, image_path: str) -> list[dict[str, Any]]:
         image_path_object = Path(image_path)
 
         if not image_path_object.exists():
@@ -52,10 +52,6 @@ class DamageDetector:
             imgsz=640,
             device=self.device,
             retina_masks=True,
-            save=True,
-            project="outputs",
-            name="damage_detection",
-            exist_ok=True,
             verbose=False,
         )
 

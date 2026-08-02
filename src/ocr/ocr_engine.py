@@ -1,7 +1,9 @@
-import cv2
-import easyocr
 import re
+
+import easyocr
+
 from src.plate_detection.plate_detector import PlateDetector
+from src.utils.image_preprocessor import ImagePreprocessor
 
 
 class OCREngine:
@@ -14,44 +16,39 @@ class OCREngine:
         )
 
         self.plate_detector = PlateDetector()
+        self.preprocessor = ImagePreprocessor()
 
         print(f"OCR Engine initialized ({self.engine_name}).")
 
     def extract_license_plate(self, image_path: str):
-        image = cv2.imread(image_path)
-
-        if image is None:
-            raise FileNotFoundError(
-                f"Unable to read cropped plate image: {image_path}"
-            )
-
-        # تحويل الصورة إلى Grayscale لأن EasyOCR يعمل معها بشكل أفضل
-        grayscale_image = cv2.cvtColor(
-            image,
-            cv2.COLOR_BGR2GRAY,
+        processed_image = self.preprocessor.preprocess_plate(
+            image_path
         )
 
-        results = self.reader.readtext(grayscale_image)
+        results = self.reader.readtext(processed_image)
 
         ignored_words = {
             "JORDAN",
-            "HKJ",
             "JOR",
+            "HKJ",
         }
 
         detected_parts = []
 
         for _, text, confidence in results:
             cleaned_text = re.sub(
-              r"[^A-Z0-9\u0600-\u06FF]",
-              "",
-              text.strip().upper(),
-)
+                r"[^A-Z0-9\u0600-\u06FF]",
+                "",
+                text.strip().upper(),
+            )
 
             if confidence < 0.50:
                 continue
 
             if cleaned_text in ignored_words:
+                continue
+
+            if cleaned_text == "":
                 continue
 
             detected_parts.append(cleaned_text)

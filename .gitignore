@@ -241,3 +241,5 @@ datasets/
 # OS
 .DS_Store
 Thumbs.db
+# AI model weights
+*.pt
